@@ -1,0 +1,90 @@
+﻿@using System.Web.Optimization
+@{
+    ViewBag.Title = "Map";
+    Layout = "~/Views/shared/_BootstrapLayout.basic.cshtml";
+}
+<head>
+  <meta charset="utf-8" />
+  <title>RunnerUp Live</title>
+    <style>
+        .ui-menu { width: 150px; }
+        #map {
+            width: 800px;
+            height: 800px;
+        }
+        .markerlabel
+        {
+            color: black;
+            background-color: white;
+            font-family: "Lucida Grande", "Arial", sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            width: 100px;
+            border: 1px solid black;
+            white-space: nowrap;
+        }
+    </style>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type ="text/javascript">
+    
+    
+
+</script>
+</head>
+<body>
+ @*<span data-bind="text: ko.toJSON(points)"></span>*@
+   
+ 
+    <h2>RunnerUp Live</h2>
+    <div id="map_canvas">
+        <div id="map"></div> 
+       @*<div id="points" data-bind="template: { name: 'pointsTmpl', foreach: points }"></div>*@
+    </div>
+    <script id="pointsTmpl" type="text/html">
+        @*<p>
+            Name: <span data-bind="text: name"></span>; 
+            Lat: <span data-bind="text: lat"></span>;
+            Long: <span data-bind="text: long"></span>
+        </p>*@
+    </script>
+
+</body>
+@section Scripts{   
+     @Scripts.Render("~/js/map/")
+<script src="~/Scripts/jquery.signalR-1.1.2.js"></script>
+    
+    <script src="~/signalr/hubs"></script>
+    <script type='text/javascript'>
+        $(function () {
+            var viewModel = new MapViewModel();
+            ko.applyBindings(viewModel);
+            
+            $.connection.hub.url = 'http://weide.devsparkles.se/signalr';
+            var myHub = $.connection.RunnerUp;
+
+
+            myHub.client.addRunningEvent = viewModel.addPosition;
+            
+            $.connection.hub.error(function () {
+                console.log("Error!");
+            });
+            $.connection.RunnerUp.logging = true;
+            $.connection.hub.start()
+            .done(function () {
+                console.log("Connected!");
+            })
+            .fail(function () { console.log("Could not connect!"); });
+
+        });
+    </script>
+    <script>
+        //$("#nav").menu({ position: { at: "left bottom" } });
+
+        $(document).ready(function () {
+            $('#menu').menu();
+        });
+
+    </script>
+}
