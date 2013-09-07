@@ -34,20 +34,39 @@
 </script>
 </head>
 <body>
- @*<span data-bind="text: ko.toJSON(points)"></span>*@
+@*<span data-bind="text: ko.toJSON(tracks.items())"></span>*@
    
  
     <h2>RunnerUp Live</h2>
     <div id="map_canvas">
+        @*<div id="points" data-bind="template: { name: 'pointsTmpl', foreach: tracks.items() }"></div>*@
+        <table width='25%'>
+    <thead  data-bind="visible: tracks.items().length > 0">
+        <tr>
+            <th  align="left" width='75%'>Username</th>
+            <th  align="left" width='25%'>Follow</th>
+        </tr>
+    </thead>
+    <tbody data-bind='foreach: tracks.items()'>
+        <tr>
+            <td>
+                <span data-bind="text: key"></span>
+            </td>
+            <td>
+                <a id="btnFollow" href="#" class="btn btn-success btn-medium" data-bind="click: value().followCommand"><i class="icon-white icon-screenshot"></i></a>
+            </td>
+        </tr>
+    </tbody>
+</table>
         <div id="map"></div> 
-       @*<div id="points" data-bind="template: { name: 'pointsTmpl', foreach: points }"></div>*@
+       
     </div>
+
     <script id="pointsTmpl" type="text/html">
-        @*<p>
-            Name: <span data-bind="text: name"></span>; 
-            Lat: <span data-bind="text: lat"></span>;
-            Long: <span data-bind="text: long"></span>
-        </p>*@
+        <p>
+            Name: <span data-bind="text: key"></span>; 
+            <a id="btnFollow" href="#" class="btn btn-success btn-medium" data-bind="click: value().followCommand"><i class="icon-white icon-screenshot"></i></a>
+        </p>
     </script>
 
 </body>
@@ -61,7 +80,7 @@
             var viewModel = new MapViewModel();
             ko.applyBindings(viewModel);
             
-            $.connection.hub.url = 'http://weide.devsparkles.se/signalr';
+            //$.connection.hub.url = 'http://weide.devsparkles.se/signalr';
             var myHub = $.connection.RunnerUp;
 
 
@@ -73,7 +92,7 @@
             $.connection.RunnerUp.logging = true;
             $.connection.hub.start()
             .done(function () {
-                console.log("Connected!");
+                console.log("Connected! yeah");
             })
             .fail(function () { console.log("Could not connect!"); });
 

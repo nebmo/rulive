@@ -103,7 +103,11 @@ namespace RunnerupWeb.Controllers
                 //    resource.Positions = new List<RunningEvent>(){runningEvent};
                 //}
             }
-            MemoryCache.Default["resource"] = _resources;
+            
+            
+            MemoryCache.Default.Set("resource", _resources, DateTimeOffset.Now.AddDays(5));
+            
+            
 
             return response;
         }

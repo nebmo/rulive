@@ -8,11 +8,11 @@ using System.Web.Mvc;
 
 namespace RunnerupWeb.Controllers
 {
-    public class DemoController : BootstrapBaseController
+    public class MapController : BootstrapBaseController
     {
         public ActionResult Map()
         {
-            return RedirectToAction("Map", "Map"); 
+            return View();
         }
 
     }

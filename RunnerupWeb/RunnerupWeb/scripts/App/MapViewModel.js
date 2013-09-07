@@ -32,6 +32,54 @@ var icon_url = "http://labs.google.com/ridefinder/images/";
 var mapViewmodel;
 //var markerCluster;
 
+function Track(name, path) {
+    me = this;
+    this.name = name;
+    this.path = ko.observable(path);
+    this.following = ko.observable(false);
+    
+    this.followCommand = function () {
+        this.following = !this.following;
+       
+        if(this.following) {
+            mapViewmodel.following = this.key();
+        } else {
+            mapViewmodel.following = '';
+        }
+        this.value().follow(this.following);
+        //mapViewmodel.zoomToLatLng(new google.maps.LatLng(tracks.get('nebmo')().getPath().b[tracks.get('nebmo')().getPath().b.length - 1].pb, tracks.get('nebmo')().getPath().b[tracks.get('nebmo')().getPath().b.length - 1].ob));
+    };
+
+    this.follow = function (following) {
+        var bounds = new google.maps.LatLngBounds();
+        var myLatLng = null;
+        if (following) {
+            for (var i = 0; i < this.path().getPath().b.length; i++) {
+
+                myLatLng = new google.maps.LatLng(this.path().getPath().b[i].ob, this.path().getPath().b[i].pb);
+
+                bounds.extend(myLatLng);
+            }
+        } else {
+            bounds.extend(new google.maps.LatLng(55, 11));
+        }
+        map.fitBounds(bounds);
+
+        var follow = following;
+        var zoomListener = google.maps.event.addListener(map, 'bounds_changed',
+        function () {
+            //map.setCenter(myLatLng);
+            if (follow) {
+                map.setZoom(15);
+                map.setCenter(myLatLng);
+            } else {
+                map.setZoom(5);
+            }
+            google.maps.event.removeListener(zoomListener);
+        });
+    };
+}
+
 function Point(name, lat, long, pointType, distance, timespent, pace) {
     this.name = name;
     this.lat = ko.observable(lat);
@@ -110,60 +158,69 @@ function Point(name, lat, long, pointType, distance, timespent, pace) {
 
 function MapViewModel() {
     mapViewmodel = this;
-    this.firstName = "Bert";
-    this.lastName = "Bertington";
-    //initCluster();
-
+    this.following = ko.observable();
     loadTrucks();
     
     this.addPosition = function (runningEvent) {
-        // Add the message to the page. 
         
         mapViewmodel.addPositionEvent(runningEvent.UserName, runningEvent.Lat, runningEvent.Long, runningEvent.RunningEventType, runningEvent.TotalDistance, runningEvent.TotalTime, runningEvent.Pace);
     };
 
     this.addPositionEvent = function (username, lat, long, eventtype, distance, timespent, pace) {
         new Point(username, lat, long, eventtype, distance, timespent, pace);
-        var poly = tracks.get(username);
+
+        var userData = tracks.get(username);
         var path = null;
         var point = new google.maps.LatLng(lat, long);
-        if (poly() == null)
+        if (userData() == null)
         {
+            
             poly = new google.maps.Polyline({
                 path: [point],
                 strokeColor: "#006600",
                 strokeOpacity: 1.0,
                 strokeWeight: 2
             });
-            tracks.push(username, poly);
+            tracks.push(username,new Track(username, poly));
             poly.setMap(map);
         }
         else
         {
-            var path = poly().getPath();
+            var path = userData().path().getPath();
             path.push(point);
+            if (username == this.following) {
+                userData().follow(true);
+            }
         }
-        if(tracks.items().length == 1) {
-            map.zoom = 20;
-            map.center = new google.maps.LatLng(lat, long);
-        }
+        
+        //if(tracks.items().length == 1) {
+        //    map.zoom = 15;
+        //    map.center = new google.maps.LatLng(lat, long);
+        //}
 
+    };
+    
+    
+
+    this.zoomToLatLng = function (latlng) {
+        map.zoom = 14;
+        map.center = latlng;
     };
 }
 
 
-function drawLines(name, polylineCoordinates) {
+//function drawLines(name, polylineCoordinates) {
     
-    var polyline = new google.maps.Polyline({
-        path: polylineCoordinates,
-        strokeColor: "#006600",
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-    });
-    tracks.push(name, polyline);
-    polyline.setMap(map);
+//    var polyline = new google.maps.Polyline({
+//        path: polylineCoordinates,
+//        strokeColor: "#006600",
+//        strokeOpacity: 1.0,
+//        strokeWeight: 2
+//    });
+//    tracks.push(name, polyline);
+//    polyline.setMap(map);
     
-}
+//}
 
 function loadTrucks() {
     $.ajax({

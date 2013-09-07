@@ -11,7 +11,7 @@ namespace RunnerupWeb.Controllers
     {
         public ActionResult Index()
         {
-            return RedirectToAction("SignIn", "Account"); 
+            return RedirectToAction("Map", "Map"); 
         }
     }
 }
