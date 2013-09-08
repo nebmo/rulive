@@ -54,15 +54,22 @@ function Track(name, path) {
         var bounds = new google.maps.LatLngBounds();
         var myLatLng = null;
         if (following) {
-            for (var i = 0; i < this.path().getPath().b.length; i++) {
+            //for (var i = 0; i < this.path().getPath().b.length; i++) {
 
-                myLatLng = new google.maps.LatLng(this.path().getPath().b[i].ob, this.path().getPath().b[i].pb);
+            //    myLatLng = new google.maps.LatLng(this.path().getPath().b[i].ob, this.path().getPath().b[i].pb);
 
-                bounds.extend(myLatLng);
-            }
+            //    bounds.extend(myLatLng);
+            //}
+            myLatLng = new google.maps.LatLng(this.path().getPath().b[this.path().getPath().b.length - 1].ob, this.path().getPath().b[this.path().getPath().b.length - 1].pb);
+            
         } else {
-            bounds.extend(new google.maps.LatLng(55, 11));
+            myLatLng = new google.maps.LatLng(55, 11);
         }
+        
+        if (map.getBounds().contains(myLatLng) && map.getZoom() == 15)
+            return;
+        
+        bounds.extend(myLatLng);
         map.fitBounds(bounds);
 
         var follow = following;
@@ -71,7 +78,7 @@ function Track(name, path) {
             //map.setCenter(myLatLng);
             if (follow) {
                 map.setZoom(15);
-                map.setCenter(myLatLng);
+                //map.setCenter(myLatLng);
             } else {
                 map.setZoom(5);
             }
