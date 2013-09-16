@@ -60,7 +60,7 @@ function Track(name, path) {
 
             //    bounds.extend(myLatLng);
             //}
-            myLatLng = new google.maps.LatLng(this.path().getPath().b[this.path().getPath().b.length - 1].ob, this.path().getPath().b[this.path().getPath().b.length - 1].pb);
+            myLatLng = this.path().getPath().getAt(this.path().getPath().length - 1);
             
         } else {
             myLatLng = new google.maps.LatLng(55, 11);
