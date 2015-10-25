@@ -32,7 +32,6 @@ namespace BootstrapSupport
                 ));
 
             bundles.Add(new ScriptBundle("~/js/map/").Include("~/scripts/App/MapViewModel.js"));
-
         }
     }
 }

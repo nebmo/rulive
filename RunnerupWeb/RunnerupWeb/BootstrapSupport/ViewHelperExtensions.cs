@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Web.Routing;
+using System.ComponentModel.DataAnnotations;
 
 namespace BootstrapSupport
 {
@@ -30,12 +32,22 @@ namespace BootstrapSupport
             {
                 elementType = Model.GetType().GetGenericArguments()[0];
             }
-            return elementType.GetProperties().Where(info => info.Name != elementType.IdentifierPropertyName()).ToArray();
+            return elementType.GetProperties().Where(info => info.Name != elementType.IdentifierPropertyName()).OrderedByDisplayAttr().ToArray();
         }
 
         public static PropertyInfo[] VisibleProperties(this Object model)
         {
-            return model.GetType().GetProperties().Where(info => info.Name != model.IdentifierPropertyName()).ToArray();
+            return model.GetType().GetProperties().Where(info => info.Name != model.IdentifierPropertyName()).OrderedByDisplayAttr().ToArray();
+        }
+
+        // Support for Order property in DisplayAttribute ([Display(..., Order = n)])
+        public static IOrderedEnumerable<PropertyInfo> OrderedByDisplayAttr(this IEnumerable<PropertyInfo> collection)
+        {
+            return collection.OrderBy(col =>
+            {
+                var attr = col.GetAttribute<DisplayAttribute>();
+                return (attr != null ? attr.GetOrder() : null) ?? 0;
+            });
         }
 
         public static RouteValueDictionary GetIdValue(this object model)
@@ -58,11 +70,11 @@ namespace BootstrapSupport
 
         public static string IdentifierPropertyName(this Type type)
         {
-            if (type.GetProperties().Any(info => info.PropertyType.AttributeExists<System.ComponentModel.DataAnnotations.KeyAttribute>()))
+            if (type.GetProperties().Any(info => info.AttributeExists<System.ComponentModel.DataAnnotations.KeyAttribute>()))
             {
                 return
                     type.GetProperties().First(
-                        info => info.PropertyType.AttributeExists<System.ComponentModel.DataAnnotations.KeyAttribute>())
+                        info => info.AttributeExists<System.ComponentModel.DataAnnotations.KeyAttribute>())
                         .Name;
             }
             else if (type.GetProperties().Any(p => p.Name.Equals("id", StringComparison.CurrentCultureIgnoreCase)))
@@ -70,6 +82,12 @@ namespace BootstrapSupport
                 return
                     type.GetProperties().First(
                         p => p.Name.Equals("id", StringComparison.CurrentCultureIgnoreCase)).Name;
+            }
+            else if (type.GetProperties().Any(p => p.Name.Equals(type.Name + "id", StringComparison.CurrentCultureIgnoreCase)))
+            {
+                return
+                    type.GetProperties().First(
+                        p => p.Name.Equals(type.Name + "id", StringComparison.CurrentCultureIgnoreCase)).Name;
             }
             return "";
         }

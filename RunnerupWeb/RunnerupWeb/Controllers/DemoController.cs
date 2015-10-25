@@ -1,10 +1,5 @@
-﻿using BootstrapMvc.Controllers;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using BootstrapMvcSample.Controllers;
 
 namespace RunnerupWeb.Controllers
 {

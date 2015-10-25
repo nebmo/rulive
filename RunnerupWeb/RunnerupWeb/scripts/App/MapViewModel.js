@@ -131,7 +131,7 @@ function Point(name, lat, long, pointType, distance, timespent, pace) {
         map: map,
         icon: image, shadow: shadow,
         labelContent: name + '<br/>' + distance + '<br/>' + timespent + '<br/>' + pace + ' min/km',
-        labelAnchor: new google.maps.Point(50,0),
+        labelAnchor: new google.maps.Point(100,0),
         labelClass: "markerlabel", // the CSS class for the label
         labelStyle: { opacity: 1 }
     });

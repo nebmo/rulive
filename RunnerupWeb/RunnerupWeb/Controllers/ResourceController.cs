@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.Caching;
+using System.Web;
 using System.Web.Http;
 using RunnerupWeb.Controllers;
 using RunnerupWeb.Hubs;
@@ -14,12 +15,19 @@ namespace RunnerupWeb.Controllers
 {
     public class ResourceController : ApiControllerWithHub<RunnerUpHub>
     {
+        private readonly IGoogleUploader _googleUploader;
+
+        public ResourceController(IGoogleUploader googleUploader)
+        {
+            _googleUploader = googleUploader;
+        }
+
         Random random = new Random();
         private Dictionary<string, Resource> _resources;// = new Dictionary<string, Resource>();
 
         public IEnumerable<Resource> Get()
         {
-            _resources = MemoryCache.Default["resource"] == null ? new Dictionary<string, Resource>() : (Dictionary<string, Resource>)MemoryCache.Default["resource"];
+            _resources = MemoryCache.Default["resource"] == null ? GetResourcesFromGoogle() : (Dictionary<string, Resource>)MemoryCache.Default["resource"];
             foreach (var resource in _resources)
             {
                 yield return resource.Value;
@@ -54,6 +62,72 @@ namespace RunnerupWeb.Controllers
             yield return null;
         }
 
+        private Dictionary<string, Resource> GetResourcesFromGoogle()
+        {
+            var dictionary = new Dictionary<string, Resource>();
+            try
+            {
+                var events = _googleUploader.GetEvents().ToList();
+                if (!events.Any())
+                    return dictionary;
+
+                return CreateDictionary(events);
+
+            }
+            catch (Exception exception)
+            {
+                dictionary.Add(exception.ToString(), new Resource()
+                {
+                    RegistrationNumber = exception.ToString(),
+                    Positions = new List<RunningEvent>()
+                    {
+                                    new RunningEvent()
+                            {
+                                Date = DateTime.Now,
+                                HR = 0,
+                                Lat = 59.4212238,
+                                Long = 17.8588099,
+                                Pace = "4.5m/s",
+                                RunningEventType = RunningEventType.GPS,
+                                TotalDistance = "12",
+                                TotalTime = "13",
+                                UserName = exception.ToString()
+
+                            }
+                    }
+                });
+            }
+
+            return dictionary;
+        }
+
+
+        private Dictionary<string, Resource> CreateDictionary(IEnumerable<RunningEvent> events)
+        {
+            var dictionary = new Dictionary<string, Resource>();
+            var name = string.Empty;
+            foreach (var runningEvent in events)
+            {
+                if (runningEvent.UserName != name)
+                {
+                    name = runningEvent.UserName;
+                    var resource = new Resource()
+                    {
+                        RegistrationNumber = runningEvent.UserName,
+                        Positions = new List<RunningEvent>() { runningEvent }
+                    };
+                    dictionary.Add(resource.RegistrationNumber, resource);
+                }
+                else
+                {
+                    var resource = dictionary[runningEvent.UserName];
+                    resource.Positions.Add(runningEvent);
+                }
+
+            }
+            return dictionary;
+        }
+
 
         // GET api/resource/5
         public string Get(int id)
@@ -70,17 +144,16 @@ namespace RunnerupWeb.Controllers
             //Notify the connected clients
             Hub.Clients.All.addRunningEvent(runningEvent);
             var response = Request.CreateResponse(HttpStatusCode.Created, runningEvent);
-            //string link = Url.Link("apiRoute", new { controller = "todo", id = item.ID });
-            //response.Headers.Location = new Uri(link);
+
             Resource resource = null;
-            if(!_resources.ContainsKey(runningEvent.UserName))
+            if (!_resources.ContainsKey(runningEvent.UserName))
             {
                 resource = new Resource()
                     {
                         RegistrationNumber = runningEvent.UserName,
-                        Positions = new List<RunningEvent>(){runningEvent}
+                        Positions = new List<RunningEvent>() { runningEvent }
                     };
-                _resources.Add(runningEvent.UserName,resource);
+                _resources.Add(runningEvent.UserName, resource);
             }
             else
             {
@@ -90,24 +163,27 @@ namespace RunnerupWeb.Controllers
 
                 if (ShouldResetRoute(runningEvent, resource))
                 {
-                    
-                     resource.Positions = new List<RunningEvent>() { runningEvent };
-                    
+
+                    resource.Positions = new List<RunningEvent>() { runningEvent };
+                    _googleUploader.RemoveOldEvents(resource.RegistrationNumber);
+
                 }
                 else
                 {
                     resource.Positions.Add(runningEvent);
+
+                    _googleUploader.QueueEvent(runningEvent);
                 }
                 //if (resource.Positions.Last().Date.AddMinutes(5) < DateTime.Now || resource.Positions.Last().Date < DateTime.Now && resource.Positions.Last().RunningEventType == RunningEventType.Paused) //&& resource.Positions.Last().TotalTime > runningEvent.TotalTime))
                 //{
                 //    resource.Positions = new List<RunningEvent>(){runningEvent};
                 //}
             }
-            
-            
+
+
             MemoryCache.Default.Set("resource", _resources, DateTimeOffset.Now.AddDays(5));
-            
-            
+
+
 
             return response;
         }
@@ -117,7 +193,7 @@ namespace RunnerupWeb.Controllers
             if (runningEvent.RunningEventType == RunningEventType.Started && string.IsNullOrEmpty(runningEvent.TotalTime))
                 return true;
             TimeSpan span1, span2;
-            return TimeSpan.TryParse(runningEvent.TotalTime.Replace("m", "").Replace("h", ""), out span1) 
+            return TimeSpan.TryParse(runningEvent.TotalTime.Replace("m", "").Replace("h", ""), out span1)
                    &&
                    TimeSpan.TryParse(resource.Positions.Last().TotalTime.Replace("m", "").Replace("h", ""), out span2)
                    && span1 < span2;
@@ -148,5 +224,5 @@ namespace RunnerupWeb.Controllers
         public List<RunningEvent> Positions { get; set; }
     }
 
-   
+
 }

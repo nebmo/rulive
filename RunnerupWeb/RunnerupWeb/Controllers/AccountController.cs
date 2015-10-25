@@ -1,5 +1,5 @@
 ﻿using System.Web.Mvc;
-using BootstrapMvc.Controllers;
+using BootstrapMvcSample.Controllers;
 
 namespace PteMvc.Controllers
 {

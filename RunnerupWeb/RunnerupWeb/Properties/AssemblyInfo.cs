@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("RunnerupWeb")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Pocketmobile Communications AB")]
+[assembly: AssemblyCompany("nebmo")]
 [assembly: AssemblyProduct("RunnerupWeb")]
-[assembly: AssemblyCopyright("Copyright © Pocketmobile Communications AB 2013")]
+[assembly: AssemblyCopyright("nebmo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

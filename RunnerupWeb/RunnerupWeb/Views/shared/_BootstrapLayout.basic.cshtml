@@ -1,4 +1,4 @@
-@using System.Web.Optimization
+﻿@using System.Web.Optimization
 @using BootstrapSupport
 @using NavigationRoutes
 <!DOCTYPE html>
@@ -21,11 +21,9 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a class="brand" href="#" title="home">RunnerUp</a>
+                    <a class="brand" href="#" title="change in _bootstrapLayout.basic.cshtml">RunnerUp Live</a>
                     <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            @Html.Navigation()
-                        </ul>
+                          @Html.Navigation()
                     </div>
                 </div>
             </div>
@@ -36,7 +34,7 @@
             @RenderBody()   
             <hr>
             <footer>
-                <p>&copy; Company @System.DateTime.Now.ToString("yyyy")</p>
+                <p>&copy; Nebmo @System.DateTime.Now.ToString("yyyy")</p>
             </footer> 
         </div>
          @Scripts.Render("~/js")

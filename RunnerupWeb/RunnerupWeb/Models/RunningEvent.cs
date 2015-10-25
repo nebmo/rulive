@@ -21,5 +21,7 @@ namespace RunnerupWeb.Models
         public string TotalTime { get; set; }
         public string Pace { get; set; }
         public DateTime Date { get; set; }
+        public int HR { get; set; }
+
     }
 }

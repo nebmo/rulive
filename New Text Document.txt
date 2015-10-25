@@ -1,0 +1,17 @@
+http://localhost:55661/api/Resource/
+
+User-Agent: Fiddler
+Content-Type : Application/Json
+Host: localhost:55661
+Content-Length: 165
+
+
+{
+	"username" : "weide",
+	"lat" : 59.4212238,
+	"long" : 17.8568199,
+	"totaldistance" : "",
+	"totaltime": "1h5m",
+	"pace" : "4min/km",
+	"runningeventtype":1
+}
